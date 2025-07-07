@@ -1,13 +1,12 @@
-version: '3.9'
+version: "3.8"
 
 services:
-  vault:
+  env-vault:
     build: .
-    container_name: env-vault
     ports:
       - "3000:3000"
+    environment:
+      DOPPLER_TOKEN_DEV: ${DOPPLER_TOKEN_DEV}
+      ALLOWED_EMAILS: ${ALLOWED_EMAILS}
     env_file:
       - .env
-    volumes:
-      - .:/app
-    restart: unless-stopped

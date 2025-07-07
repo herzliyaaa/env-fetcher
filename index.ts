@@ -3,22 +3,18 @@ import staticPlugin from "@fastify/static";
 import path from "path";
 import { fileURLToPath } from "url";
 
-// Resolve __dirname for Bun
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const fastify = Fastify();
 
-// Serve static files from /public
+// Serve static HTML and assets from public/
 await fastify.register(staticPlugin, {
-  root: path.join(path.dirname(fileURLToPath(import.meta.url)), "public"),
-  prefix: "/", // maps to root
+  root: path.join(__dirname, "public"),
+  prefix: "/",
 });
-// Fallback route
-// fastify.get("/", async (req, reply) => {
-//   return { message: "Vault is working!" };
-// });
 
+// ENV setup
 const DOPPLER_TOKEN = process.env.DOPPLER_TOKEN_DEV;
 const ALLOWED_EMAILS = (process.env.ALLOWED_EMAILS || "")
   .split(",")
@@ -64,10 +60,6 @@ fastify.get("/env", async (request, reply) => {
       .send({ error: "Invalid JSON response from Doppler" });
   }
 
-  const allowedKeys = ["NEXT_PUBLIC_API_URL"]; // Update this as needed
-  const filtered = Object.fromEntries(
-    Object.entries(secrets).filter(([key]) => allowedKeys.includes(key))
-  );
 
   return reply.send({ env: secrets });
 });

@@ -1,17 +1,17 @@
 # Use official Bun image
 FROM oven/bun:1.1.0
 
+# Set working directory
 WORKDIR /app
 
-# Copy all files
+# Copy files
 COPY . .
-COPY public ./public
 
-# Install deps (if needed, e.g., dotenv or fastify plugins)
+# Install dependencies
 RUN bun install
 
-# Expose the default port
+# Expose port
 EXPOSE 3000
 
-# Run the Bun app
+# Run the app
 CMD ["bun", "index.ts"]
