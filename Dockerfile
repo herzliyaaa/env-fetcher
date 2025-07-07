@@ -1,17 +1,16 @@
-# Use official Bun image
+# Use Bun base image
 FROM oven/bun:1.1.0
 
-# Set working directory
 WORKDIR /app
 
-# Copy files
+# Copy project files
 COPY . .
 
 # Install dependencies
 RUN bun install
 
-# Expose port
+# Expose port 3000
 EXPOSE 3000
 
-# Run the app
+# Run Bun
 CMD ["bun", "index.ts"]

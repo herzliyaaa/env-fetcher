@@ -8,10 +8,13 @@ const __dirname = path.dirname(__filename);
 
 const fastify = Fastify();
 
-// Serve static HTML and assets from public/
 await fastify.register(staticPlugin, {
-  root: path.join(__dirname, "public"),
+  root: path.join(__dirname, "public"), // ✅ simpler and safer inside Docker
   prefix: "/",
+});
+
+fastify.get("/", async (req, reply) => {
+  return reply.sendFile("index.html");
 });
 
 // ENV setup
@@ -60,10 +63,14 @@ fastify.get("/env", async (request, reply) => {
       .send({ error: "Invalid JSON response from Doppler" });
   }
 
-
   return reply.send({ env: secrets });
 });
 
+fastify.setNotFoundHandler((req, reply) => {
+    reply.status(404).send("Not Found");
+  });
+
+  
 fastify.listen({ port: 3000, host: "0.0.0.0" }, () => {
   console.log("✅ Fastify is listening on http://0.0.0.0:3000");
 });
