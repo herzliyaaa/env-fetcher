@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vault</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="min-h-screen bg-gray-100 flex items-center justify-center px-6 py-10">
+    <div class="bg-white shadow-xl rounded-2xl p-10 w-full max-w-7xl flex flex-col lg:flex-row gap-8">
+        <!-- Left: Form (smaller inputs/buttons) -->
+        <div class="w-full lg:w-1/3 space-y-4">
+            <h2 class="text-2xl font-bold text-gray-800 text-center lg:text-left">Environment Vault</h2>
+
+            <input type="email" id="email" placeholder="Enter your email"
+                class="w-full text-sm px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+
+            <select id="env-select"
+                class="w-full text-sm px-3 py-2 border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <option value="dev">dev</option>
+                <option value="staging" disabled>staging (disabled)</option>
+                <option value="prod" disabled>prod (disabled)</option>
+            </select>
+
+            <button onclick="fetchEnv()"
+                class="w-full bg-blue-600 text-white text-sm font-medium py-2 rounded-md hover:bg-blue-700 transition">
+                Submit
+            </button>
+        </div>
+
+        <!-- Right: Output (larger + copy button) -->
+        <div class="w-full lg:w-2/3 flex flex-col">
+            <div class="flex justify-between items-center mb-2">
+                <h3 class="text-lg font-semibold text-gray-700">Output</h3>
+                <div class="flex flex-row justify-right">
+                    <button onclick="copyToClipboard()"
+                        class="text-sm px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded-md border border-gray-300">
+                        📋 Copy to Clipboard
+                    </button>
+                    <button onclick="downloadAsEnv()"
+                        class="text-sm px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded-md border border-gray-300 ml-2">
+                        💾 Export .env
+                    </button>
+                </div>
+
+
+            </div>
+
+            <pre id="result"
+                class="bg-gray-100 text-sm p-4 rounded-md text-gray-800 overflow-x-auto h-[40rem] border border-gray-300 whitespace-pre-wrap font-mono"></pre>
+
+        </div>
+    </div>
+
+    <script>
+        async function fetchEnv() {
+            const email = document.getElementById('email').value;
+            const env = document.getElementById('env-select').value;
+            const resultEl = document.getElementById('result');
+
+            if (!email) {
+                resultEl.textContent = '⚠️ Please enter a valid email.';
+                return;
+            }
+
+            try {
+                const res = await fetch(`/env?config=${env}`, {
+                    headers: {
+                        'x-dev-email': email,
+                    },
+                });
+
+                const data = await res.json();
+
+                if (!res.ok) {
+                    resultEl.textContent = `❌ ${data.error || 'Unknown error'}`;
+                } else {
+                    resultEl.innerHTML = renderFormattedEnv(data.env);
+                }
+            } catch (err) {
+                resultEl.textContent = `❌ Request failed: ${err.message}`;
+            }
+        }
+
+        function copyToClipboard() {
+            const text = document.getElementById("result").textContent;
+            if (!text || text.includes("⚠️") || text.includes("❌")) return;
+
+            navigator.clipboard.writeText(text).then(() => {
+                alert("✅ Copied to clipboard!");
+            }, () => {
+                alert("❌ Failed to copy.");
+            });
+        }
+
+        function downloadAsEnv() {
+            const text = document.getElementById("result").textContent;
+            if (!text || text.includes("⚠️") || text.includes("❌")) return;
+
+            const blob = new Blob([text], { type: "text/plain" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+
+            a.href = url;
+            a.download = ".env";
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+
+        function renderFormattedEnv(data) {
+            return Object.entries(data)
+                .map(
+                    ([key, value]) =>
+                        `<span class="text-blue-700 font-semibold">${key}</span>=<span class="text-green-700">"${value}"</span>`
+                )
+                .join('\n');
+        }
+
+
+    </script>
+</body>
+
+</html>

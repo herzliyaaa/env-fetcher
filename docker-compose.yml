@@ -1,0 +1,13 @@
+version: '3.9'
+
+services:
+  vault:
+    build: .
+    container_name: env-vault
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    volumes:
+      - .:/app
+    restart: unless-stopped
