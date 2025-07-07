@@ -2,20 +2,22 @@ import Fastify from "fastify";
 import staticPlugin from "@fastify/static";
 import path from "path";
 import { fileURLToPath } from "url";
-import cors from "@fastify/cors";
-import dotenv from "dotenv";
 
-dotenv.config();
+// Resolve __dirname for Bun
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const fastify = Fastify();
 
-// CORS (for dev/test use only)
-await fastify.register(cors);
-
-// Serve static index.html from /public
+// Serve static files from /public
 await fastify.register(staticPlugin, {
-  root: path.join(path.dirname(fileURLToPath(import.meta.url)), "public"),
+  root: path.join(__dirname, "public"),
   prefix: "/",
+});
+
+// Fallback route
+fastify.get("/", async (req, reply) => {
+  return { message: "Vault is working!" };
 });
 
 const DOPPLER_TOKEN = process.env.DOPPLER_TOKEN_DEV;
@@ -71,6 +73,6 @@ fastify.get("/env", async (request, reply) => {
   return reply.send({ env: secrets });
 });
 
-fastify.listen({ port: 3000 }, () => {
-  console.log(`🚀 Fastify+Bun running at http://localhost:3000`);
-});
+fastify.listen({ port: 3000, host: "0.0.0.0" }, () => {
+    console.log("✅ Fastify is listening on http://0.0.0.0:3000");
+  });
