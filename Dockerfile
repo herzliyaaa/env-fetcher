@@ -5,6 +5,7 @@ WORKDIR /app
 
 # Copy all files
 COPY . .
+COPY public ./public
 
 # Install deps (if needed, e.g., dotenv or fastify plugins)
 RUN bun install

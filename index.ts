@@ -11,14 +11,13 @@ const fastify = Fastify();
 
 // Serve static files from /public
 await fastify.register(staticPlugin, {
-  root: path.join(__dirname, "public"),
-  prefix: "/",
+  root: path.join(path.dirname(fileURLToPath(import.meta.url)), "public"),
+  prefix: "/", // maps to root
 });
-
 // Fallback route
-fastify.get("/", async (req, reply) => {
-  return { message: "Vault is working!" };
-});
+// fastify.get("/", async (req, reply) => {
+//   return { message: "Vault is working!" };
+// });
 
 const DOPPLER_TOKEN = process.env.DOPPLER_TOKEN_DEV;
 const ALLOWED_EMAILS = (process.env.ALLOWED_EMAILS || "")
@@ -74,5 +73,5 @@ fastify.get("/env", async (request, reply) => {
 });
 
 fastify.listen({ port: 3000, host: "0.0.0.0" }, () => {
-    console.log("✅ Fastify is listening on http://0.0.0.0:3000");
-  });
+  console.log("✅ Fastify is listening on http://0.0.0.0:3000");
+});
